@@ -20,11 +20,11 @@ namespace ToDo
                 }
                 else if (variable == 2)
                 {
-                    ShowMenuDos();
+                    ShowMenuRemove();
                 }
                 else if (variable == 3)
                 {
-                    ShowMenuTres();
+                    ShowMenuPending();
                 }
             } while (variable != 4);
         }
@@ -35,23 +35,23 @@ namespace ToDo
         public static int ShowMainMenu()
         {
             Console.WriteLine("----------------------------------------");
-            Console.WriteLine("Ingrese la opción a realizar: ");
-            Console.WriteLine("1. Nueva tarea");
-            Console.WriteLine("2. Remover tarea");
-            Console.WriteLine("3. Tareas pendientes");
-            Console.WriteLine("4. Salir");
+            Console.WriteLine("Enter the option to perform: ");
+            Console.WriteLine("1. New task");
+            Console.WriteLine("2. Remove task");
+            Console.WriteLine("3. Pending tasks");
+            Console.WriteLine("4. Exit");
 
             // Read line
             string line = Console.ReadLine();
             return Convert.ToInt32(line);
         }
 
-        public static void ShowMenuDos()
+        public static void ShowMenuRemove()
         {
             try
             {
-                Console.WriteLine("Ingrese el número de la tarea a remover: ");
-                // Show current taks
+                Console.WriteLine("Enter the number of the task to remove: ");
+                // Show current tasks
                 for (int i = 0; i < TL.Count; i++)
                 {
                     Console.WriteLine((i + 1) + ". " + TL[i]);
@@ -67,7 +67,7 @@ namespace ToDo
                     {
                         string task = TL[indexToRemove];
                         TL.RemoveAt(indexToRemove);
-                        Console.WriteLine("Tarea " + task + " eliminada");
+                        Console.WriteLine("Task " + task + " removed");
                     }
                 }
             }
@@ -80,21 +80,21 @@ namespace ToDo
         {
             try
             {
-                Console.WriteLine("Ingrese el nombre de la tarea: ");
+                Console.WriteLine("Enter the task name: ");
                 string task = Console.ReadLine();
                 TL.Add(task);
-                Console.WriteLine("Tarea registrada");
+                Console.WriteLine("Task registered");
             }
             catch (Exception)
             {
             }
         }
 
-        public static void ShowMenuTres()
+        public static void ShowMenuPending()
         {
             if (TL == null || TL.Count == 0)
             {
-                Console.WriteLine("No hay tareas por realizar");
+                Console.WriteLine("There are no pending tasks");
             } 
             else
             {
