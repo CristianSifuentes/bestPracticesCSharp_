@@ -13,6 +13,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [How to Use the Application](#how-to-use-the-application)
 - [Current Features](#current-features)
 - [Clean Code Learning Goals](#clean-code-learning-goals)
+- [C# Language Evolution](#c-language-evolution)
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
 - [Code Smells in C#](#code-smells-in-c)
 - [DRY Principle in C#](#dry-principle-in-c)
@@ -124,6 +125,73 @@ Key learning goals include:
 - Improve input validation and error handling
 - Make the code easier to test
 - Apply refactoring techniques safely
+
+## C# Language Evolution
+
+C# has evolved continuously since its release. It is not just a programming language with a fixed syntax; it has grown alongside the .NET platform to support cleaner, safer, and more expressive code.
+
+Understanding this evolution helps developers recognize when modern language features can simplify existing code without changing behavior.
+
+### Important Milestones
+
+Historically, C# versions were strongly connected to .NET Framework and later to .NET Core and modern .NET releases.
+
+- **C# 4.0**: Released around the .NET Framework 4 era, it introduced language improvements that are still common in many codebases.
+- **C# 6.0**: Arrived during the transition toward .NET Core and introduced several features that made everyday code more concise.
+- **2017 and later**: C# and .NET releases became more frequent, with the language receiving regular improvements that focus on readability, safety, and developer productivity.
+
+### Features That Improved Everyday Code
+
+Several C# features are especially useful when refactoring older code into cleaner modern code.
+
+**Auto-property initializers** let a property receive a default value directly where it is declared:
+
+```csharp
+public static List<string> TaskList { get; } = new List<string>();
+```
+
+This project uses that idea to create `TaskList` in one clear place instead of assigning it later in the application flow.
+
+**String interpolation** improves readability when combining text with values:
+
+```csharp
+Console.WriteLine($"Task {task} removed");
+```
+
+This is clearer than building the same output with manual string concatenation.
+
+**Null-conditional operators** reduce defensive `if` statements when checking nullable values:
+
+```csharp
+return TaskList?.Count > 0;
+```
+
+This keeps the null check close to the operation and makes the intent easy to read.
+
+**Local functions and lambda expressions** can make code more compact when a small behavior belongs close to the method that uses it. They should still be used carefully: clarity matters more than clever syntax.
+
+### Recent Language Features to Know
+
+Modern C# versions introduced features that can make code shorter and more expressive:
+
+- **Tuples**: Useful for returning small groups of related values without creating a full class.
+- **Switch expressions and pattern matching**: Helpful when a decision returns a value or when branching depends on shape, type, or state.
+- **Top-level statements**: Allow simple programs to avoid the full namespace/class/method structure.
+- **Global using directives**: Reduce repeated `using` statements across files in larger projects.
+
+Not every modern feature belongs in every project. The goal is to use language improvements when they make the code easier to understand, not just because they are available.
+
+### Why These Improvements Matter
+
+Modern C# features help developers write code that is:
+
+- Easier for beginners to approach
+- Easier for teams to read and maintain
+- Less repetitive
+- Safer around null values and invalid states
+- Better aligned with current .NET development practices
+
+For this ToDo console app, the most useful modern features are the small ones: property initializers, string interpolation, and null-conditional access. They improve the code without adding new architecture or changing the behavior.
 
 ## Naming Best Practices in C#
 
