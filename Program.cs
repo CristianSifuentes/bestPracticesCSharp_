@@ -1,165 +1,181 @@
-﻿using System;
-using System.Collections.Generic;
+namespace ToDo;
 
-namespace ToDo
+/// <summary>
+/// Entry point and console workflow for the in-memory ToDo application.
+/// </summary>
+internal class Program
 {
-    internal class Program
+    private const string Separator = "----------------------------------------";
+
+    /// <summary>
+    /// Stores tasks for the current application session.
+    /// </summary>
+    /// <remarks>
+    /// Syntax improvement: the collection expression [] initializes the list at declaration time,
+    /// keeping setup minimal and preventing null state for this in-memory collection.
+    /// </remarks>
+    public static List<string> TaskList { get; } = [];
+
+    /// <summary>
+    /// Represents the valid menu actions supported by the console UI.
+    /// </summary>
+    public enum MenuOptions
     {
-        private const string Separator = "----------------------------------------";
+        /// <summary>Fallback option for input that cannot be parsed.</summary>
+        Invalid = 0,
 
-        // Property initializer: TaskList is created when the Program class is loaded.
-        public static List<string> TaskList { get; } = new List<string>();
+        /// <summary>Adds a new task to the list.</summary>
+        NewTask = 1,
 
+        /// <summary>Removes an existing task from the list.</summary>
+        RemoveTask = 2,
 
-        public enum MenuOptions
+        /// <summary>Displays all pending tasks.</summary>
+        PendingTasks = 3,
+
+        /// <summary>Closes the application.</summary>
+        Exit = 4
+    }
+
+    static void Main(string[] args)
+    {
+        try
         {
-            Invalid = 0,
-            NewTask = 1,
-            RemoveTask = 2,
-            PendingTasks = 3,
-            Exit = 4
+            RunApplication();
         }
-        static void Main(string[] args)
+        catch (Exception exception)
         {
-            try
+            ShowUnexpectedError(exception);
+        }
+    }
+
+    private static void RunApplication()
+    {
+        MenuOptions menuOption;
+        do
+        {
+            menuOption = ShowMainMenu();
+
+            switch (menuOption)
             {
-                RunApplication();
+                case MenuOptions.NewTask:
+                    ShowMenuAdd();
+                    break;
+                case MenuOptions.RemoveTask:
+                    ShowMenuRemove();
+                    break;
+                case MenuOptions.PendingTasks:
+                    ShowMenuPending();
+                    break;
+                case MenuOptions.Invalid:
+                    Console.WriteLine("Invalid menu option");
+                    break;
             }
-            catch (Exception exception)
-            {
-                ShowUnexpectedError(exception);
-            }
-        }
+        } while (menuOption != MenuOptions.Exit);
+    }
 
-        private static void RunApplication()
+    /// <summary>
+    /// Shows the main menu and returns the selected option.
+    /// </summary>
+    /// <returns>The selected menu option, or <see cref="MenuOptions.Invalid"/> when input cannot be parsed.</returns>
+    public static MenuOptions ShowMainMenu()
+    {
+        ShowSeparator();
+        Console.WriteLine("Enter the option to perform: ");
+        Console.WriteLine($"{(int)MenuOptions.NewTask}. New task");
+        Console.WriteLine($"{(int)MenuOptions.RemoveTask}. Remove task");
+        Console.WriteLine($"{(int)MenuOptions.PendingTasks}. Pending tasks");
+        Console.WriteLine($"{(int)MenuOptions.Exit}. Exit");
+
+        // Null-coalescing keeps nullable console input explicit and warning-free.
+        string line = Console.ReadLine() ?? string.Empty;
+        if (int.TryParse(line, out int option) && Enum.IsDefined(typeof(MenuOptions), option))
         {
-            MenuOptions menuOption;
-            do
-            {
-                menuOption = ShowMainMenu();
-
-                switch (menuOption)
-                {
-                    case MenuOptions.NewTask:
-                        ShowMenuAdd();
-                        break;
-                    case MenuOptions.RemoveTask:
-                        ShowMenuRemove();
-                        break;
-                    case MenuOptions.PendingTasks:
-                        ShowMenuPending();
-                        break;
-                    case MenuOptions.Invalid:
-                        Console.WriteLine("Invalid menu option");
-                        break;
-                }
-            } while (menuOption != MenuOptions.Exit);
+            return (MenuOptions)option;
         }
-        /// <summary>
-        /// Show the main menu 
-        /// </summary>
-        /// <returns>Returns option indicated by user</returns>
-        public static MenuOptions ShowMainMenu()
+
+        return MenuOptions.Invalid;
+    }
+
+    /// <summary>
+    /// Displays the removal workflow and removes a task when the selected number is valid.
+    /// </summary>
+    public static void ShowMenuRemove()
+    {
+        if (!HasTasks())
         {
-            ShowSeparator();
-            Console.WriteLine("Enter the option to perform: ");
-            Console.WriteLine("1. New task");
-            Console.WriteLine("2. Remove task");
-            Console.WriteLine("3. Pending tasks");
-            Console.WriteLine("4. Exit");
-
-            // Read line
-            string line = Console.ReadLine();
-            if (int.TryParse(line, out int option) && Enum.IsDefined(typeof(MenuOptions), option))
-            {
-                return (MenuOptions)option;
-            }
-
-            return MenuOptions.Invalid;
+            ShowNoPendingTasks();
+            return;
         }
 
-        public static void ShowMenuRemove()
+        Console.WriteLine("Enter the number of the task to remove: ");
+        ShowTaskList();
+
+        string line = Console.ReadLine() ?? string.Empty;
+        if (!int.TryParse(line, out int taskNumber))
         {
-            if (!HasTasks())
-            {
-                ShowNoPendingTasks();
-                return;
-            }
-
-            Console.WriteLine("Enter the number of the task to remove: ");
-            ShowTaskList();
-
-            string line = Console.ReadLine();
-            if (!int.TryParse(line, out int taskNumber))
-            {
-                Console.WriteLine("Invalid task number");
-                return;
-            }
-
-            // Remove one position
-            int indexToRemove = taskNumber - 1;
-            if (indexToRemove < 0 || indexToRemove >= TaskList.Count)
-            {
-                Console.WriteLine("Task number does not exist");
-                return;
-            }
-
-            string task = TaskList[indexToRemove];
-            TaskList.RemoveAt(indexToRemove);
-            // String interpolation: inserts the task value directly into the output text.
-            Console.WriteLine($"Task {task} removed");
+            Console.WriteLine("Invalid task number");
+            return;
         }
 
-        public static void ShowMenuAdd()
+        int indexToRemove = taskNumber - 1;
+        // Relational pattern matching makes the valid index range easy to read.
+        if (indexToRemove is < 0 || indexToRemove >= TaskList.Count)
         {
-            Console.WriteLine("Enter the task name: ");
-            string task = Console.ReadLine();
-            TaskList.Add(task);
-            Console.WriteLine("Task registered");
+            Console.WriteLine("Task number does not exist");
+            return;
         }
 
-        public static void ShowMenuPending()
+        string task = TaskList[indexToRemove];
+        TaskList.RemoveAt(indexToRemove);
+        Console.WriteLine($"Task {task} removed");
+    }
+
+    /// <summary>
+    /// Reads a new task from the console and stores it in <see cref="TaskList"/>.
+    /// </summary>
+    public static void ShowMenuAdd()
+    {
+        Console.WriteLine("Enter the task name: ");
+        string task = Console.ReadLine() ?? string.Empty;
+        TaskList.Add(task);
+        Console.WriteLine("Task registered");
+    }
+
+    /// <summary>
+    /// Displays the current pending tasks.
+    /// </summary>
+    public static void ShowMenuPending()
+    {
+        if (!HasTasks())
         {
-            if (!HasTasks())
-            {
-                ShowNoPendingTasks();
-                return;
-            }
-
-            ShowTaskList();
+            ShowNoPendingTasks();
+            return;
         }
 
-        private static bool HasTasks()
+        ShowTaskList();
+    }
+
+    // Expression-bodied helpers keep one-line behavior compact without hiding intent.
+    private static bool HasTasks() => TaskList.Count > 0;
+
+    private static void ShowTaskList()
+    {
+        ShowSeparator();
+        for (int i = 0; i < TaskList.Count; i++)
         {
-            // Null-conditional operator: safely checks Count only if TaskList is not null.
-            return TaskList?.Count > 0;
+            Console.WriteLine($"{i + 1}. {TaskList[i]}");
         }
+        ShowSeparator();
+    }
 
-        private static void ShowTaskList()
-        {
-            ShowSeparator();
-            for (int i = 0; i < TaskList.Count; i++)
-            {
-                // String interpolation: formats the task number and task text in one readable line.
-                Console.WriteLine($"{i + 1}. {TaskList[i]}");
-            }
-            ShowSeparator();
-        }
+    private static void ShowSeparator() => Console.WriteLine(Separator);
 
-        private static void ShowSeparator()
-        {
-            Console.WriteLine(Separator);
-        }
+    private static void ShowNoPendingTasks() => Console.WriteLine("There are no pending tasks");
 
-        private static void ShowNoPendingTasks()
-        {
-            Console.WriteLine("There are no pending tasks");
-        }
-
-        private static void ShowUnexpectedError(Exception exception)
-        {
-            Console.WriteLine("An unexpected error occurred.");
-            Console.WriteLine(exception.Message);
-        }
+    private static void ShowUnexpectedError(Exception exception)
+    {
+        Console.WriteLine("An unexpected error occurred.");
+        Console.WriteLine(exception.Message);
     }
 }
