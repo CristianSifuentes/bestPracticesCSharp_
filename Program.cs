@@ -20,6 +20,18 @@ namespace ToDo
         }
         static void Main(string[] args)
         {
+            try
+            {
+                RunApplication();
+            }
+            catch (Exception exception)
+            {
+                ShowUnexpectedError(exception);
+            }
+        }
+
+        private static void RunApplication()
+        {
             TaskList = new List<string>();
             MenuOptions menuOption;
             do
@@ -139,6 +151,12 @@ namespace ToDo
         private static void ShowNoPendingTasks()
         {
             Console.WriteLine("There are no pending tasks");
+        }
+
+        private static void ShowUnexpectedError(Exception exception)
+        {
+            Console.WriteLine("An unexpected error occurred.");
+            Console.WriteLine(exception.Message);
         }
     }
 }
