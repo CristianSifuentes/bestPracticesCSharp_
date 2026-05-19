@@ -15,6 +15,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Clean Code Learning Goals](#clean-code-learning-goals)
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
 - [Code Smells in C#](#code-smells-in-c)
+- [DRY Principle in C#](#dry-principle-in-c)
 - [Suggested Improvements](#suggested-improvements)
 - [Project Structure](#project-structure)
 
@@ -391,13 +392,135 @@ dotnet run
 
 For this project, good next steps include replacing menu magic numbers with an enum, improving input validation, and replacing empty `catch` blocks with intentional error handling.
 
+## DRY Principle in C#
+
+DRY means **Don't Repeat Yourself**. It is a software development principle that encourages developers to avoid unnecessary duplication in code, knowledge, and behavior.
+
+In C#, applying DRY usually means extracting repeated routines into reusable methods, classes, or types. This keeps the code easier to read, easier to test, and easier to maintain. When duplicated logic changes, a DRY design lets you make the change in one place instead of hunting through multiple copies.
+
+### Why DRY Is Often Broken
+
+The most common reason DRY is broken is copy and paste. Copying code is not always wrong, especially while learning or exploring a solution, but copied code should be understood, adapted, and consolidated when a reusable pattern appears.
+
+Duplication often appears in two forms:
+
+- Exactly duplicated sections that can be extracted into a shared method
+- Similar routines that can be unified with parameters or a small abstraction
+
+The important step is to look for repeated patterns and ask whether the code is expressing one concept in several places.
+
+### Applying DRY to This Project
+
+This ToDo application has two flows that display tasks: listing pending tasks and showing tasks before removing one. If both flows contain their own copy of the task-listing logic, a future formatting change would need to be made twice.
+
+A DRY improvement is to extract the shared display logic into a reusable method:
+
+```csharp
+public static void ShowMenuPending()
+{
+    if (TaskList == null || TaskList.Count == 0)
+    {
+        Console.WriteLine("There are no pending tasks");
+        return;
+    }
+
+    ShowTaskList();
+}
+
+public static void ShowMenuRemove()
+{
+    Console.WriteLine("Enter the number of the task to remove: ");
+    ShowTaskList();
+
+    // Logic to remove the selected task...
+}
+
+private static void ShowTaskList()
+{
+    for (int i = 0; i < TaskList.Count; i++)
+    {
+        Console.WriteLine((i + 1) + ". " + TaskList[i]);
+    }
+
+    Console.WriteLine("----------------------------------------");
+}
+```
+
+In this example, `ShowTaskList` owns the repeated task-list display behavior. Both menu actions can reuse it, so future changes to task formatting happen in one place.
+
+### A Broader DRY Example
+
+Without DRY, code that manages repeated concepts can grow quickly:
+
+```csharp
+string user1Name = "Alice";
+int user1Age = 30;
+string user1Email = "alice@email.com";
+
+string user2Name = "Bob";
+int user2Age = 25;
+string user2Email = "bob@email.com";
+
+Console.WriteLine($"User 1: {user1Name}, {user1Age} years old, Email: {user1Email}");
+Console.WriteLine($"User 2: {user2Name}, {user2Age} years old, Email: {user2Email}");
+```
+
+A cleaner approach is to represent the repeated concept with a class:
+
+```csharp
+class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public string Email { get; set; }
+
+    public User(string name, int age, string email)
+    {
+        Name = name;
+        Age = age;
+        Email = email;
+    }
+
+    public void DisplayUserInfo()
+    {
+        Console.WriteLine($"User: {Name}, {Age} years old, Email: {Email}");
+    }
+}
+```
+
+Now the behavior and data structure live in one reusable place.
+
+### Benefits of DRY
+
+Applying DRY provides several practical benefits:
+
+- Easier maintenance because shared behavior changes in one place
+- Better readability because repeated noise is reduced
+- Fewer inconsistencies because duplicated logic cannot drift apart as easily
+- Better scalability because new features can reuse existing routines
+- Improved testability because smaller reusable pieces are easier to verify
+
+### Practicing DRY Safely
+
+DRY should be applied thoughtfully. Extract repeated code when it represents the same idea, not just because two blocks look similar for the moment. Premature abstraction can make code harder to understand.
+
+A safe workflow is:
+
+1. Find repeated code.
+2. Confirm the repeated code represents the same concept.
+3. Extract the shared behavior into a method or type.
+4. Build and run the project.
+5. Keep the refactor small enough to review easily.
+
+For this project, a good next DRY exercise is extracting the task-list display logic used by the pending-tasks and remove-task flows.
+
 ## Suggested Improvements
 
 Future refactoring sessions can focus on:
 
 - Handling invalid menu input without crashing
 - Avoiding empty `catch` blocks
-- Replacing menu magic numbers with a descriptive enum
+- Extracting duplicated task-list display logic into a reusable method
 - Extracting task management logic from console UI logic
 - Adding automated tests for task behavior
 - Persisting tasks to a file or database
