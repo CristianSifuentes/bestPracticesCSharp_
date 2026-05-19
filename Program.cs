@@ -22,17 +22,18 @@ namespace ToDo
             do
             {
                 menuOption = ShowMainMenu();
-                if (menuOption == (int)MenuOptions.NewTask)
+
+                switch ((MenuOptions)menuOption)
                 {
-                    ShowMenuAdd();
-                }
-                else if (menuOption == (int)MenuOptions.RemoveTask)
-                {
-                    ShowMenuRemove();
-                }
-                else if (menuOption == (int)MenuOptions.PendingTasks)
-                {
-                    ShowMenuPending();
+                    case MenuOptions.NewTask:
+                        ShowMenuAdd();
+                        break;
+                    case MenuOptions.RemoveTask:
+                        ShowMenuRemove();
+                        break;
+                    case MenuOptions.PendingTasks:
+                        ShowMenuPending();
+                        break;
                 }
             } while (menuOption != (int)MenuOptions.Exit);
         }
