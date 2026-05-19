@@ -7,6 +7,14 @@ namespace ToDo
     {
         public static List<string> TaskList { get; set; }
 
+
+        public enum MenuOptions
+        {
+            NewTask = 1,
+            RemoveTask = 2,
+            PendingTasks = 3,
+            Exit = 4
+        }
         static void Main(string[] args)
         {
             TaskList = new List<string>();
@@ -14,19 +22,19 @@ namespace ToDo
             do
             {
                 menuOption = ShowMainMenu();
-                if (menuOption == 1)
+                if (menuOption == (int)MenuOptions.NewTask)
                 {
                     ShowMenuAdd();
                 }
-                else if (menuOption == 2)
+                else if (menuOption == (int)MenuOptions.RemoveTask)
                 {
                     ShowMenuRemove();
                 }
-                else if (menuOption == 3)
+                else if (menuOption == (int)MenuOptions.PendingTasks)
                 {
                     ShowMenuPending();
                 }
-            } while (menuOption != 4);
+            } while (menuOption != (int)MenuOptions.Exit);
         }
         /// <summary>
         /// Show the main menu 
