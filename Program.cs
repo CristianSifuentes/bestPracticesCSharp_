@@ -5,6 +5,8 @@ namespace ToDo
 {
     internal class Program
     {
+        private const string Separator = "----------------------------------------";
+
         public static List<string> TaskList { get; set; }
 
 
@@ -43,7 +45,7 @@ namespace ToDo
         /// <returns>Returns option indicated by user</returns>
         public static int ShowMainMenu()
         {
-            Console.WriteLine("----------------------------------------");
+            ShowSeparator();
             Console.WriteLine("Enter the option to perform: ");
             Console.WriteLine("1. New task");
             Console.WriteLine("2. Remove task");
@@ -59,25 +61,23 @@ namespace ToDo
         {
             try
             {
-                Console.WriteLine("Enter the number of the task to remove: ");
-                // Show current tasks
-                for (int i = 0; i < TaskList.Count; i++)
+                if (!HasTasks())
                 {
-                    Console.WriteLine((i + 1) + ". " + TaskList[i]);
+                    ShowNoPendingTasks();
+                    return;
                 }
-                Console.WriteLine("----------------------------------------");
+
+                Console.WriteLine("Enter the number of the task to remove: ");
+                ShowTaskList();
 
                 string line = Console.ReadLine();
                 // Remove one position
                 int indexToRemove = Convert.ToInt32(line) - 1;
-                if (indexToRemove > -1)
+                if (indexToRemove > -1 && indexToRemove < TaskList.Count)
                 {
-                    if (TaskList.Count > 0)
-                    {
-                        string task = TaskList[indexToRemove];
-                        TaskList.RemoveAt(indexToRemove);
-                        Console.WriteLine("Task " + task + " removed");
-                    }
+                    string task = TaskList[indexToRemove];
+                    TaskList.RemoveAt(indexToRemove);
+                    Console.WriteLine("Task " + task + " removed");
                 }
             }
             catch (Exception)
@@ -101,19 +101,38 @@ namespace ToDo
 
         public static void ShowMenuPending()
         {
-            if (TaskList == null || TaskList.Count == 0)
+            if (!HasTasks())
             {
-                Console.WriteLine("There are no pending tasks");
-            } 
-            else
-            {
-                Console.WriteLine("----------------------------------------");
-                for (int i = 0; i < TaskList.Count; i++)
-                {
-                    Console.WriteLine((i + 1) + ". " + TaskList[i]);
-                }
-                Console.WriteLine("----------------------------------------");
+                ShowNoPendingTasks();
+                return;
             }
+
+            ShowTaskList();
+        }
+
+        private static bool HasTasks()
+        {
+            return TaskList != null && TaskList.Count > 0;
+        }
+
+        private static void ShowTaskList()
+        {
+            ShowSeparator();
+            for (int i = 0; i < TaskList.Count; i++)
+            {
+                Console.WriteLine((i + 1) + ". " + TaskList[i]);
+            }
+            ShowSeparator();
+        }
+
+        private static void ShowSeparator()
+        {
+            Console.WriteLine(Separator);
+        }
+
+        private static void ShowNoPendingTasks()
+        {
+            Console.WriteLine("There are no pending tasks");
         }
     }
 }
