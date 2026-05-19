@@ -7,7 +7,8 @@ namespace ToDo
     {
         private const string Separator = "----------------------------------------";
 
-        public static List<string> TaskList { get; set; }
+        // Property initializer: TaskList is created when the Program class is loaded.
+        public static List<string> TaskList { get; } = new List<string>();
 
 
         public enum MenuOptions
@@ -32,7 +33,6 @@ namespace ToDo
 
         private static void RunApplication()
         {
-            TaskList = new List<string>();
             MenuOptions menuOption;
             do
             {
@@ -106,7 +106,8 @@ namespace ToDo
 
             string task = TaskList[indexToRemove];
             TaskList.RemoveAt(indexToRemove);
-            Console.WriteLine("Task " + task + " removed");
+            // String interpolation: inserts the task value directly into the output text.
+            Console.WriteLine($"Task {task} removed");
         }
 
         public static void ShowMenuAdd()
@@ -130,7 +131,8 @@ namespace ToDo
 
         private static bool HasTasks()
         {
-            return TaskList != null && TaskList.Count > 0;
+            // Null-conditional operator: safely checks Count only if TaskList is not null.
+            return TaskList?.Count > 0;
         }
 
         private static void ShowTaskList()
@@ -138,7 +140,8 @@ namespace ToDo
             ShowSeparator();
             for (int i = 0; i < TaskList.Count; i++)
             {
-                Console.WriteLine((i + 1) + ". " + TaskList[i]);
+                // String interpolation: formats the task number and task text in one readable line.
+                Console.WriteLine($"{i + 1}. {TaskList[i]}");
             }
             ShowSeparator();
         }
