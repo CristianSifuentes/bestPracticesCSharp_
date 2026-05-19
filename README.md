@@ -21,6 +21,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [DRY Principle in C#](#dry-principle-in-c)
 - [KISS Principle in C#](#kiss-principle-in-c)
 - [Exception Handling in C#](#exception-handling-in-c)
+- [Comments and Code Documentation](#comments-and-code-documentation)
 - [Suggested Improvements](#suggested-improvements)
 - [Project Structure](#project-structure)
 
@@ -1020,6 +1021,95 @@ Good exception handling should:
 Used well, `try-catch` helps the program fail gracefully and gives developers better diagnostic information. Used everywhere, it can hide bugs, make the code harder to follow, and add unnecessary overhead.
 
 For this project, the best current approach is to validate menu options and task indexes directly, while saving `try-catch` for future features that interact with files, databases, services, or other external resources.
+
+## Comments and Code Documentation
+
+Comments can make software easier to understand and maintain when they add context that the code cannot express by itself. They can also become noise when they repeat obvious behavior or explain code that should be renamed or simplified instead.
+
+The goal is not to comment more. The goal is to comment better.
+
+### Comments to Avoid
+
+Avoid comments that simply repeat what the code already says.
+
+Poor practice:
+
+```csharp
+// Read line
+string line = Console.ReadLine();
+```
+
+The statement is already clear enough. A better improvement is to make the variable or method name more expressive, or to handle edge cases directly.
+
+Also avoid:
+
+- Commented-out code that is kept "for later"
+- Comments that describe every small change made over time
+- Comments that explain a confusing block instead of improving the block
+- Comments that duplicate the method name without adding context
+
+Version control already records code history, so change notes usually belong in commits, pull requests, or release notes rather than inline comments.
+
+### When Comments Are Useful
+
+Useful comments explain **why**, not just **what**.
+
+Good cases include:
+
+- Complex logic that cannot be simplified further
+- Non-obvious decisions or tradeoffs
+- Edge cases that future maintainers might accidentally remove
+- Regular expressions, parsing rules, or domain-specific constraints
+- Public APIs where XML documentation improves IntelliSense
+
+Example:
+
+```csharp
+int indexToRemove = taskNumber - 1;
+// User-facing task numbers start at 1, but list indexes start at 0.
+```
+
+The code shows the calculation. The comment explains the reason.
+
+### XML Documentation
+
+For public or course-facing methods, XML documentation can be useful because editors can show it through IntelliSense.
+
+Example:
+
+```csharp
+/// <summary>
+/// Shows the main menu and returns the selected option.
+/// </summary>
+/// <returns>The selected menu option, or Invalid when input cannot be parsed.</returns>
+public static MenuOptions ShowMainMenu()
+{
+    // ...
+}
+```
+
+Use XML comments when they help someone call or understand a method from the outside. Avoid XML comments that only restate the method name.
+
+### Comments in This Project
+
+`Program.cs` uses comments in two intentional ways:
+
+- XML documentation explains course-facing members such as `Program`, `TaskList`, `MenuOptions`, and public menu methods.
+- Short inline comments explain non-obvious syntax choices, such as collection expressions, null-coalescing, relational pattern matching, and expression-bodied helpers.
+
+This keeps the file useful for learning without making every line visually noisy.
+
+### Comment Review Checklist
+
+When reviewing comments, ask:
+
+1. Does this comment explain something the code cannot express clearly?
+2. Would a better name remove the need for this comment?
+3. Is the comment still true after the latest refactor?
+4. Is this documenting intent, a tradeoff, or a real edge case?
+5. Should this information live in README documentation instead of the code?
+
+Good comments are small, accurate, and intentional. If a comment becomes outdated or redundant, remove it as part of normal cleanup.
 
 ## Suggested Improvements
 
