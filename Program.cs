@@ -12,6 +12,7 @@ namespace ToDo
 
         public enum MenuOptions
         {
+            Invalid = 0,
             NewTask = 1,
             RemoveTask = 2,
             PendingTasks = 3,
@@ -20,12 +21,12 @@ namespace ToDo
         static void Main(string[] args)
         {
             TaskList = new List<string>();
-            int menuOption = 0;
+            MenuOptions menuOption;
             do
             {
                 menuOption = ShowMainMenu();
 
-                switch ((MenuOptions)menuOption)
+                switch (menuOption)
                 {
                     case MenuOptions.NewTask:
                         ShowMenuAdd();
@@ -36,14 +37,17 @@ namespace ToDo
                     case MenuOptions.PendingTasks:
                         ShowMenuPending();
                         break;
+                    case MenuOptions.Invalid:
+                        Console.WriteLine("Invalid menu option");
+                        break;
                 }
-            } while (menuOption != (int)MenuOptions.Exit);
+            } while (menuOption != MenuOptions.Exit);
         }
         /// <summary>
         /// Show the main menu 
         /// </summary>
         /// <returns>Returns option indicated by user</returns>
-        public static int ShowMainMenu()
+        public static MenuOptions ShowMainMenu()
         {
             ShowSeparator();
             Console.WriteLine("Enter the option to perform: ");
@@ -54,49 +58,51 @@ namespace ToDo
 
             // Read line
             string line = Console.ReadLine();
-            return Convert.ToInt32(line);
+            if (int.TryParse(line, out int option) && Enum.IsDefined(typeof(MenuOptions), option))
+            {
+                return (MenuOptions)option;
+            }
+
+            return MenuOptions.Invalid;
         }
 
         public static void ShowMenuRemove()
         {
-            try
+            if (!HasTasks())
             {
-                if (!HasTasks())
-                {
-                    ShowNoPendingTasks();
-                    return;
-                }
-
-                Console.WriteLine("Enter the number of the task to remove: ");
-                ShowTaskList();
-
-                string line = Console.ReadLine();
-                // Remove one position
-                int indexToRemove = Convert.ToInt32(line) - 1;
-                if (indexToRemove > -1 && indexToRemove < TaskList.Count)
-                {
-                    string task = TaskList[indexToRemove];
-                    TaskList.RemoveAt(indexToRemove);
-                    Console.WriteLine("Task " + task + " removed");
-                }
+                ShowNoPendingTasks();
+                return;
             }
-            catch (Exception)
+
+            Console.WriteLine("Enter the number of the task to remove: ");
+            ShowTaskList();
+
+            string line = Console.ReadLine();
+            if (!int.TryParse(line, out int taskNumber))
             {
+                Console.WriteLine("Invalid task number");
+                return;
             }
+
+            // Remove one position
+            int indexToRemove = taskNumber - 1;
+            if (indexToRemove < 0 || indexToRemove >= TaskList.Count)
+            {
+                Console.WriteLine("Task number does not exist");
+                return;
+            }
+
+            string task = TaskList[indexToRemove];
+            TaskList.RemoveAt(indexToRemove);
+            Console.WriteLine("Task " + task + " removed");
         }
 
         public static void ShowMenuAdd()
         {
-            try
-            {
-                Console.WriteLine("Enter the task name: ");
-                string task = Console.ReadLine();
-                TaskList.Add(task);
-                Console.WriteLine("Task registered");
-            }
-            catch (Exception)
-            {
-            }
+            Console.WriteLine("Enter the task name: ");
+            string task = Console.ReadLine();
+            TaskList.Add(task);
+            Console.WriteLine("Task registered");
         }
 
         public static void ShowMenuPending()

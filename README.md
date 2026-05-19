@@ -16,6 +16,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
 - [Code Smells in C#](#code-smells-in-c)
 - [DRY Principle in C#](#dry-principle-in-c)
+- [KISS Principle in C#](#kiss-principle-in-c)
 - [Suggested Improvements](#suggested-improvements)
 - [Project Structure](#project-structure)
 
@@ -513,6 +514,131 @@ A safe workflow is:
 5. Keep the refactor small enough to review easily.
 
 For this project, a good next DRY exercise is extracting the task-list display logic used by the pending-tasks and remove-task flows.
+
+## KISS Principle in C#
+
+KISS means **Keep It Simple, Stupid**. A friendlier version is **Keep It Short and Simple**. The idea is the same: prefer the simplest solution that clearly solves the problem.
+
+Clean code does not always mean adding more files, classes, patterns, or abstraction layers. Sometimes the most professional solution is the small one that another developer can understand immediately.
+
+### Why KISS Matters
+
+KISS helps avoid overengineering. Overengineering happens when the solution is much more complex than the problem requires.
+
+Separating responsibilities is useful when it improves clarity, testability, or changeability. The risk appears when new abstractions are added only "just in case" or to solve a simple problem with an unnecessarily large design.
+
+Use this rule of thumb:
+
+- If the problem is simple, start with a direct solution.
+- If the problem becomes complex, introduce structure deliberately.
+- If an abstraction does not reduce real complexity, wait before adding it.
+
+### KISS and Refactoring
+
+KISS is especially useful during refactoring. A refactor should make the code easier to understand without changing behavior. If a refactor creates too many moving parts, it may be technically clever but harder to maintain.
+
+In this project, extracting a reusable `ShowTaskList` method is a good KISS-friendly refactor because it removes duplicated behavior without introducing a new class hierarchy or unnecessary architecture.
+
+### Preincrement and Postincrement
+
+When numbering items, C# supports both postincrement and preincrement:
+
+- `index++` uses the current value first, then increments it.
+- `++index` increments the value first, then uses it.
+
+If a counter starts at `0`, postincrement prints `0` first:
+
+```csharp
+int index = 0;
+Console.WriteLine(index++);
+```
+
+If the same counter uses preincrement, it prints `1` first:
+
+```csharp
+int index = 0;
+Console.WriteLine(++index);
+```
+
+Another simple option is to start the counter at `1` and use postincrement:
+
+```csharp
+int index = 1;
+Console.WriteLine(index++);
+```
+
+The current project uses `i + 1` while iterating through the list. That is also simple and clear for this small console application:
+
+```csharp
+for (int i = 0; i < TaskList.Count; i++)
+{
+    Console.WriteLine((i + 1) + ". " + TaskList[i]);
+}
+```
+
+### Avoid Clever Code When Clear Code Is Better
+
+A compact one-line expression is not always simpler. If a line requires too much mental effort, splitting it into clear steps may be more maintainable.
+
+Less clear:
+
+```csharp
+var result = value > 10 ? value * 2 + offset / 3 : value - offset * 4;
+```
+
+Clearer:
+
+```csharp
+if (value > 10)
+{
+    return value * 2 + offset / 3;
+}
+
+return value - offset * 4;
+```
+
+The clearer version may use more lines, but it is easier to scan, debug, and change.
+
+### Avoid Unnecessary Abstractions
+
+Do not introduce classes, interfaces, or patterns before they solve a real problem. For example, this console application does not need a large architecture just to print a menu and manage an in-memory list.
+
+Better reasons to add structure include:
+
+- The file is becoming hard to navigate
+- Logic needs automated tests
+- Multiple features need the same behavior
+- Responsibilities are clearly mixed
+- Future changes are already painful
+
+### Benefits of KISS
+
+Applying KISS helps create code that is:
+
+- Easier to read
+- Easier to debug
+- Easier to maintain
+- Easier to extend
+- Less likely to hide defects behind unnecessary complexity
+
+### Practicing KISS Safely
+
+Before adding a new abstraction, ask:
+
+1. Does this solve a real problem today?
+2. Does this make the code easier to read?
+3. Would a simpler method or variable be enough?
+4. Can the next developer understand this quickly?
+5. Can I verify the behavior after the change?
+
+Use the same safety loop after simplifying code:
+
+```bash
+dotnet build
+dotnet run
+```
+
+For this project, KISS means making small improvements that reduce confusion without turning a simple console application into an oversized system.
 
 ## Suggested Improvements
 
