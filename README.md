@@ -17,6 +17,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Code Smells in C#](#code-smells-in-c)
 - [DRY Principle in C#](#dry-principle-in-c)
 - [KISS Principle in C#](#kiss-principle-in-c)
+- [Exception Handling in C#](#exception-handling-in-c)
 - [Suggested Improvements](#suggested-improvements)
 - [Project Structure](#project-structure)
 
@@ -639,6 +640,143 @@ dotnet run
 ```
 
 For this project, KISS means making small improvements that reduce confusion without turning a simple console application into an oversized system.
+
+## Exception Handling in C#
+
+`try-catch` is a C# structure used to handle exceptional errors in a controlled way. It is important to use it deliberately: exceptions are useful for unexpected failures, but they should not replace normal validation or simple control flow.
+
+### When to Use try-catch
+
+Use `try-catch` when the code may fail for reasons that are hard to prevent with ordinary checks.
+
+Good examples include:
+
+- Network errors when calling an external service
+- File system errors when reading or writing files
+- Database failures
+- Unexpected errors from third-party APIs
+- Operations where the environment can change outside your program's control
+
+Avoid using exceptions for expected user input mistakes. In those cases, validation is clearer and usually faster.
+
+### Prefer Validation for Expected Cases
+
+For expected situations, check the condition before the operation. This keeps the program flow simple and avoids using exceptions as normal logic.
+
+Prefer this:
+
+```csharp
+public static double GetDivision(int a, int b)
+{
+    if (b == 0)
+    {
+        return double.NaN;
+    }
+
+    return a / b;
+}
+```
+
+Avoid this when zero is an expected input:
+
+```csharp
+public static double GetDivisionException(int a, int b)
+{
+    try
+    {
+        return a / b;
+    }
+    catch (DivideByZeroException)
+    {
+        return double.NaN;
+    }
+}
+```
+
+The first version handles the known condition before the exception happens.
+
+### Handle Exceptions Intentionally
+
+An empty `catch` block hides failures and makes debugging harder. If an exception is caught, the code should do something useful with it: show a clear message, log the error, retry safely, release resources, or stop the operation.
+
+Poor practice:
+
+```csharp
+try
+{
+    RemoveTask();
+}
+catch (Exception)
+{
+}
+```
+
+Better practice:
+
+```csharp
+try
+{
+    RemoveTask();
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine("The task could not be removed.");
+    LogError(ex);
+}
+```
+
+In real applications, `LogError` would write details to a logging system so developers can diagnose the issue later.
+
+### Validate Indexes Before Accessing Lists
+
+List access is a common place where validation is better than catching exceptions. Check that the selected index is inside the valid range before using it.
+
+```csharp
+if (indexToRemove >= 0 && indexToRemove < TaskList.Count)
+{
+    string task = TaskList[indexToRemove];
+    TaskList.RemoveAt(indexToRemove);
+}
+else
+{
+    Console.WriteLine("Task number does not exist");
+}
+```
+
+This project follows that approach in the remove-task flow: it validates the selected task number before removing from `TaskList`.
+
+### Use TryParse for User Input
+
+Console input is text, and users may type something that is not a number. `TryParse` keeps the code explicit and avoids unnecessary exceptions.
+
+```csharp
+if (!int.TryParse(line, out int taskNumber))
+{
+    Console.WriteLine("Invalid task number");
+    return;
+}
+```
+
+This is simpler than catching a parsing exception because invalid input is expected behavior in an interactive console app.
+
+### Keep try-catch Focused
+
+Large `try-catch` blocks can make it harder to know which operation failed. Keep the block as small as practical and catch the most specific exception type you can handle.
+
+Good exception handling should:
+
+- Catch exceptions only where the code can respond meaningfully
+- Prefer specific exception types over generic `Exception`
+- Avoid empty `catch` blocks
+- Preserve useful diagnostic information
+- Use `finally` or `using` when resources must be released
+- Let unexpected errors move upward when the current method cannot handle them safely
+
+### Impact on Program Flow
+
+Used well, `try-catch` helps the program fail gracefully and gives developers better diagnostic information. Used everywhere, it can hide bugs, make the code harder to follow, and add unnecessary overhead.
+
+For this project, the best current approach is to validate menu options and task indexes directly, while saving `try-catch` for future features that interact with files, databases, services, or other external resources.
 
 ## Suggested Improvements
 
