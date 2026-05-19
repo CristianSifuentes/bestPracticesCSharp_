@@ -14,6 +14,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Current Features](#current-features)
 - [Clean Code Learning Goals](#clean-code-learning-goals)
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
+- [Code Smells in C#](#code-smells-in-c)
 - [Suggested Improvements](#suggested-improvements)
 - [Project Structure](#project-structure)
 
@@ -237,14 +238,166 @@ dotnet run
 
 The next step is to continue analyzing the code, identify more opportunities for improvement, and apply these principles consistently. After naming, a natural follow-up topic is learning how to recognize and remove code smells.
 
+## Code Smells in C#
+
+A code smell is a symptom in the source code that suggests something may be harder to understand, maintain, test, or extend than it needs to be. A smell is not always a bug, but it is a signal that the code deserves a closer look.
+
+Developers get better at recognizing code smells through practice. Over time, unclear names, repeated logic, long methods, hidden assumptions, and fragile error handling start to stand out quickly during reading or review.
+
+### Naming Smells
+
+Unclear names are one of the most common code smells. Variables, methods, and classes should explain their purpose without forcing the reader to inspect every implementation detail.
+
+Examples of naming smells include:
+
+- Abbreviations that hide meaning
+- Generic names such as `data`, `item`, or `value` when a more specific name exists
+- Method names that describe a UI location instead of a behavior
+- Class names that include unnecessary prefixes, suffixes, or numbers
+
+In this project, names such as `TaskList` and `menuOption` are more helpful than short or generic alternatives because they describe the role of the value.
+
+### Long Methods and Large Classes
+
+Very long methods and classes often indicate that too many responsibilities are grouped together. There is no universal line limit, but classes with hundreds or thousands of lines should raise a warning during review.
+
+When a method or class feels difficult to scan, consider extracting smaller pieces with focused responsibilities. For this console application, one possible direction is separating task management logic from console input and output.
+
+### Too Many Parameters
+
+A method with many parameters can be hard to call correctly and hard to understand. It may also indicate that the method is doing too much or that related values should be grouped into a small object.
+
+When a method starts accumulating parameters, review whether:
+
+- The method has more than one responsibility
+- Some parameters naturally belong together
+- The behavior should be split into smaller operations
+- A dedicated type would make the call clearer
+
+### Magic Numbers and Strings
+
+Magic numbers and strings are hardcoded values whose meaning is not obvious from the code. They make readers ask, "Why this value?"
+
+In the current menu, the options are represented by direct numbers:
+
+```csharp
+if (menuOption == 1)
+{
+    ShowMenuAdd();
+}
+```
+
+A clearer version can use an enum:
+
+```csharp
+enum MenuOption
+{
+    Add = 1,
+    Remove = 2,
+    List = 3,
+    Exit = 4
+}
+```
+
+With this approach, the code communicates intent through names instead of unexplained numbers.
+
+### Empty Catch Blocks
+
+Empty `catch` blocks hide failures and make debugging harder. If an exception is expected, handle it deliberately. If it is not expected, log it, show a useful message, or let it move up to a caller that can handle it.
+
+Poor practice:
+
+```csharp
+try
+{
+    // Code that may fail
+}
+catch (Exception)
+{
+}
+```
+
+Better practice:
+
+```csharp
+try
+{
+    // Code that may fail
+}
+catch (FormatException ex)
+{
+    Console.WriteLine($"Invalid input: {ex.Message}");
+}
+```
+
+When rethrowing an exception in C#, prefer `throw;` inside the `catch` block to preserve the original stack trace.
+
+### String Concatenation in Loops
+
+Strings are immutable in C#, so repeated concatenation inside large loops can create unnecessary allocations. For many repeated additions, use `StringBuilder`.
+
+Poor practice:
+
+```csharp
+string message = string.Empty;
+
+for (int i = 0; i < 100; i++)
+{
+    message = message + "Item " + i;
+}
+```
+
+Better practice:
+
+```csharp
+var messageBuilder = new StringBuilder();
+
+for (int i = 0; i < 100; i++)
+{
+    messageBuilder.Append("Item ");
+    messageBuilder.Append(i);
+}
+```
+
+### Other Common Code Smells
+
+Additional smells to watch for include:
+
+- Duplicate code that should be extracted into a shared method
+- Compiler warnings that are ignored for too long
+- Unnecessary object initialization before assigning the real value
+- Missing null checks where values may be absent
+- Event handlers that are subscribed but never unsubscribed
+- Direct calls to `GC.Collect()` without a very specific reason
+- Comments that explain confusing code instead of improving the code itself
+- Missing tests for important behavior
+
+### How to Improve Code Smells Safely
+
+Improve smells in small steps. Each change should make the code easier to read or safer to modify without changing behavior unexpectedly.
+
+Useful workflow:
+
+1. Identify one smell.
+2. Make the smallest useful improvement.
+3. Build the project.
+4. Run the application.
+5. Repeat with the next smell.
+
+```bash
+dotnet build
+dotnet run
+```
+
+For this project, good next steps include replacing menu magic numbers with an enum, improving input validation, and replacing empty `catch` blocks with intentional error handling.
+
 ## Suggested Improvements
 
 Future refactoring sessions can focus on:
 
-- Renaming `TL` to a clearer name such as `tasks`
-- Renaming generic variables such as `variable` to names that describe their purpose
 - Handling invalid menu input without crashing
 - Avoiding empty `catch` blocks
+- Replacing menu magic numbers with a descriptive enum
 - Extracting task management logic from console UI logic
 - Adding automated tests for task behavior
 - Persisting tasks to a file or database
