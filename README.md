@@ -14,6 +14,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Current Features](#current-features)
 - [Clean Code Learning Goals](#clean-code-learning-goals)
 - [C# Language Evolution](#c-language-evolution)
+- [Modern C# Syntax in This Project](#modern-c-syntax-in-this-project)
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
 - [Code Smells in C#](#code-smells-in-c)
 - [DRY Principle in C#](#dry-principle-in-c)
@@ -192,6 +193,90 @@ Modern C# features help developers write code that is:
 - Better aligned with current .NET development practices
 
 For this ToDo console app, the most useful modern features are the small ones: property initializers, string interpolation, and null-conditional access. They improve the code without adding new architecture or changing the behavior.
+
+## Modern C# Syntax in This Project
+
+Modern C# includes small syntax improvements that make everyday code easier to read and maintain. This project uses a few of them in practical places.
+
+### String Interpolation
+
+String interpolation is useful when combining text with variables or expressions. It avoids long chains of string concatenation with `+`.
+
+Before:
+
+```csharp
+foreach (var item in items)
+{
+    Console.WriteLine(index + ". " + item);
+}
+```
+
+After:
+
+```csharp
+foreach (var item in items)
+{
+    Console.WriteLine($"{index}. {item}");
+}
+```
+
+To use string interpolation:
+
+1. Add `$` before the opening quotation mark.
+2. Put variables or expressions inside `{}`.
+
+In this project, string interpolation is used when displaying tasks and removal messages:
+
+```csharp
+Console.WriteLine($"{i + 1}. {TaskList[i]}");
+Console.WriteLine($"Task {task} removed");
+```
+
+This keeps the output format compact and easy to scan.
+
+### Property Initializers
+
+Collections should be initialized before they are used. If a list is expected to store values throughout the program, initializing it early helps prevent null reference errors.
+
+One option is to assign the list later:
+
+```csharp
+taskList = new List<Task>();
+```
+
+A cleaner option is to initialize the property where it is declared:
+
+```csharp
+public List<Task> TaskList { get; set; } = new List<Task>();
+```
+
+This project uses the same idea for the in-memory task list:
+
+```csharp
+public static List<string> TaskList { get; } = new List<string>();
+```
+
+Because the property is initialized immediately, the rest of the program can use `TaskList` without needing a separate setup assignment.
+
+### Null-Conditional and Null-Coalescing Operators
+
+C# provides operators that make null handling clearer.
+
+The **null-conditional operator** `?.` safely accesses a member only when the value is not null:
+
+```csharp
+return TaskList?.Count > 0;
+```
+
+The **null-coalescing operator** `??` provides a fallback value when the left side is null:
+
+```csharp
+string message = userProvidedMessage ?? "Default value";
+```
+
+Use `?.` when you want to safely access a property or method. Use `??` when you want to provide a default value.
+
+These operators reduce repetitive null checks while keeping the code expressive.
 
 ## Naming Best Practices in C#
 
