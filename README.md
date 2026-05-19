@@ -15,6 +15,7 @@ The goal is not only to run the application, but also to study it, identify comm
 - [Clean Code Learning Goals](#clean-code-learning-goals)
 - [C# Language Evolution](#c-language-evolution)
 - [Modern C# Syntax in This Project](#modern-c-syntax-in-this-project)
+- [Modernizing the .NET Project Structure](#modernizing-the-net-project-structure)
 - [Naming Best Practices in C#](#naming-best-practices-in-c)
 - [Code Smells in C#](#code-smells-in-c)
 - [DRY Principle in C#](#dry-principle-in-c)
@@ -277,6 +278,95 @@ string message = userProvidedMessage ?? "Default value";
 Use `?.` when you want to safely access a property or method. Use `??` when you want to provide a default value.
 
 These operators reduce repetitive null checks while keeping the code expressive.
+
+## Modernizing the .NET Project Structure
+
+Modern C# features are easiest to use when the project targets a modern .NET version. Many language and SDK improvements became common starting with .NET 6 and continue in later versions such as .NET 8.
+
+This repository currently targets .NET 8:
+
+```xml
+<TargetFramework>net8.0</TargetFramework>
+```
+
+That means the project can use modern C# syntax while staying aligned with a supported .NET platform.
+
+### Target .NET 6 or Later
+
+To use modern language features in an older project, update the project file to target `.NET 6` or later:
+
+```xml
+<PropertyGroup>
+  <OutputType>Exe</OutputType>
+  <TargetFramework>net8.0</TargetFramework>
+</PropertyGroup>
+```
+
+For console applications, keep `OutputType` as `Exe`. If it is removed and the project uses executable-style code, the build may fail or the SDK may not treat the project as a runnable application.
+
+### Implicit Usings
+
+`ImplicitUsings` can reduce repeated `using` directives at the top of files. When enabled, the SDK automatically includes common namespaces for the project type.
+
+```xml
+<PropertyGroup>
+  <OutputType>Exe</OutputType>
+  <TargetFramework>net8.0</TargetFramework>
+  <ImplicitUsings>enable</ImplicitUsings>
+</PropertyGroup>
+```
+
+This can make small files cleaner, but it should be introduced intentionally. If the goal of the lesson is to show exactly where each namespace comes from, explicit `using` statements may still be useful.
+
+### Top-Level Statements
+
+Top-level statements allow small console applications to run without explicitly writing a `Program` class and `Main` method.
+
+Traditional structure:
+
+```csharp
+internal class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
+    }
+}
+```
+
+Top-level statement style:
+
+```csharp
+Console.WriteLine("Hello, World!");
+```
+
+This is helpful for demos, scripts, and very small programs. For this project, keeping the `Program` class is still reasonable because the course is practicing methods, responsibilities, enums, and refactoring.
+
+### File-Scoped Namespaces
+
+Modern C# also supports file-scoped namespaces. They remove one indentation level by replacing namespace braces with a semicolon:
+
+```csharp
+namespace ToDo;
+
+internal class Program
+{
+}
+```
+
+This can reduce visual nesting while keeping the same namespace. It is a good candidate for a small future cleanup if the team wants a more modern file layout.
+
+### Keep Modernization Non-Invasive
+
+Modernization should make the code smaller or clearer without creating conflict. A safe approach is:
+
+1. Update the target framework.
+2. Build the project.
+3. Enable one SDK or language feature at a time.
+4. Build and run after each change.
+5. Keep features that improve clarity and skip features that only make the code look clever.
+
+For this repository, the best modernization path is evolutionary: keep the console app understandable, use modern syntax where it helps, and avoid turning a learning project into an overcomplicated structure.
 
 ## Naming Best Practices in C#
 
